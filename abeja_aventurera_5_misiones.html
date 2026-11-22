@@ -1,0 +1,400 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="abeja.png"><title>Abeja Aventurera · 5 misiones</title><style>
+:root{font-family:system-ui,'Trebuchet MS',sans-serif;color:#352c24}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(#c9effb,#f8edb8);display:grid;place-items:center;padding:12px}#app{width:min(1100px,100%);border:7px solid #6a402a;border-radius:26px;overflow:hidden;background:#fff5d9;box-shadow:0 15px 50px #4b613a70;position:relative}header{background:linear-gradient(#845231,#5a3728);color:#fff8df;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}h1{font-size:clamp(20px,3vw,32px);margin:0;color:#ffdd73;text-shadow:2px 3px #3b261d}.stats{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.pill{background:#ffedb8;color:#624022;border-radius:99px;padding:7px 11px;font-weight:900;font-size:13px}button{cursor:pointer;border:0;border-radius:14px;padding:12px 18px;background:linear-gradient(#ffe17c,#f3ab28);color:#51321b;font-weight:900;box-shadow:0 4px #a76d20;font-size:15px}button:hover{filter:brightness(1.05)}button:active{transform:translateY(3px);box-shadow:0 1px #a76d20}button:disabled{opacity:.45;cursor:not-allowed}button.secondary{background:linear-gradient(#a6e08c,#67b86e);box-shadow:0 4px #3e8051}#mission{background:#fff0bd;padding:10px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}#mission strong{color:#78512d}#missionText{font-size:14px}.progress{height:12px;border-radius:12px;background:#c7b690;overflow:hidden;width:140px;border:2px solid #a58b59}.progress span{display:block;height:100%;background:linear-gradient(90deg,#f6b321,#8dc853);width:0;transition:width .1s}#game{position:relative;overflow:hidden;touch-action:none;cursor:crosshair;background:#b9e5f4}canvas{display:block;width:100%;height:auto;aspect-ratio:1000/540}#hud{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f7e6b5;padding:10px 15px;flex-wrap:wrap}#hint{font-size:13px;font-weight:750}#controls{display:flex;gap:7px;align-items:center}#controls button{padding:8px 12px;font-size:12px}#touch{display:none;gap:6px;align-items:center}#touch button{min-width:45px}#overlay{position:absolute;inset:0;background:#173b37b8;display:flex;align-items:center;justify-content:center;padding:15px;z-index:10}#overlay.hidden{display:none}.modal{background:linear-gradient(160deg,#fff8df,#f9e4ae);border:6px solid #85512e;border-radius:25px;box-shadow:0 12px 0 #3b281d70,0 20px 50px #0006;width:min(630px,100%);padding:20px 24px;max-height:94%;overflow:auto;text-align:center}.modal h2{margin:5px 0 10px;font-size:clamp(23px,4vw,35px);color:#885326}.modal p{font-size:16px;line-height:1.5}.modal .art{font-size:48px;line-height:1.2}.modal .note{font-size:13px;color:#785e42}.modal .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px}.modal .task{background:#fff3c9;border:2px dashed #cba456;border-radius:14px;padding:12px;margin:12px 0}.modal .task button{margin:5px}.modal .feedback{font-weight:800;color:#487b3b;min-height:23px}#stageDots{display:flex;gap:5px}.dot{width:18px;height:10px;border-radius:10px;background:#d0b989}.dot.done{background:#5cae6b}.dot.active{background:#f5b928}@media(max-width:650px){#touch{display:flex}header{padding:10px}#mission{padding:9px}#hud{padding:8px}.modal{padding:15px}button{font-size:13px}}
+</style><link rel="stylesheet" href="abeja-aventurera-redesign.css"></head><body><div id="app"><header><h1>🐝 Abeja Aventurera</h1><div class="stats"><span class="pill" id="score">⭐ 0 puntos</span><span class="pill" id="level">🌼 Misión 1/5</span><button id="sound" aria-label="Activar o desactivar sonido">🔊</button><div id="topControls"><button id="pause" class="secondary" aria-label="Pausar o reanudar">⏸</button><button id="restart" class="secondary" aria-label="Reiniciar partida">↻</button></div></div></header><div id="mission"><div><strong id="missionTitle">Visita la primera flor</strong><div id="missionText">Acércate a la flor señalada.</div></div><div style="display:flex;align-items:center;gap:10px"><div id="stageDots"></div><div class="progress"><span id="bar"></span></div></div></div><div id="game"><canvas id="scene" width="1000" height="540" aria-label="Jardín interactivo de polinización"></canvas><div id="touch" class="touch-floating"><button data-key="ArrowLeft" aria-label="Mover izquierda">◀</button><button data-key="ArrowUp" aria-label="Mover arriba">▲</button><button data-key="ArrowDown" aria-label="Mover abajo">▼</button><button data-key="ArrowRight" aria-label="Mover derecha">▶</button></div><div id="overlay"><div class="modal" id="modal"></div></div></div></div></div>
+<script>
+(()=>{'use strict';const c=document.getElementById('scene'),ctx=c.getContext('2d'),overlay=document.getElementById('overlay'),modal=document.getElementById('modal');const $=id=>document.getElementById(id);const beeAvatar=document.createElementNS('http://www.w3.org/2000/svg','svg');beeAvatar.setAttribute('viewBox','0 0 140 110');beeAvatar.setAttribute('aria-hidden','true');beeAvatar.classList.add('bee-avatar');beeAvatar.innerHTML=`<g class="bee-image"><image href="abejita-protagonista.png" x="0" y="0" width="140" height="110" preserveAspectRatio="xMidYMid meet"/></g>`;document.getElementById('game').appendChild(beeAvatar);let beeTilt=0;function updateBeeAvatar(t){const cr=c.getBoundingClientRect(),gr=c.parentElement.getBoundingClientRect(),sx=cr.width/1000,sy=cr.height/540,scale=Math.min(sx,sy),w=140*scale,h=110*scale;beeAvatar.style.width=w+'px';beeAvatar.style.height=h+'px';beeAvatar.style.left=(cr.left-gr.left+bee.x*sx-w/2)+'px';beeAvatar.style.top=(cr.top-gr.top+bee.y*sy-h/2)+'px';beeAvatar.style.transform=`rotate(${beeTilt}deg)`;const pollen=beeAvatar.querySelector('#bee-pollen');if(pollen)pollen.style.display=bee.pollen?'block':'none'}function celebrateBee(){beeAvatar.classList.remove('celebrate');void beeAvatar.offsetWidth;beeAvatar.classList.add('celebrate');setTimeout(()=>beeAvatar.classList.remove('celebrate'),1600)}let stage=0,score=0,started=false,paused=false,locked=true,hold=0,progress=0,sound=true,last=0,mouseDown=false,goal=null,particles=[],visited=false,quizDone=false;const background=new Image();background.src='Pradera florida con animales y cascada.webp';let backgroundReady=false;background.onload=()=>backgroundReady=true;const IMAGE_W=1671,IMAGE_H=941;function scenePoint(px,py){const scale=Math.max(1000/IMAGE_W,540/IMAGE_H);return{x:px*scale,y:py*scale-(IMAGE_H*scale-540)/2}}let bee={x:100,y:150,pollen:false};let keys=new Set(),target=null;const flowers=[{...scenePoint(365,506),r:72,color:'#f58cb3',kind:'A',label:'Flor rosa izquierda'},{...scenePoint(780,617),r:70,color:'#b69aee',kind:'B',label:'Flor violeta central'},{...scenePoint(1110,545),r:72,color:'#ef89b2',kind:'A',label:'Flor rosa derecha'},{...scenePoint(1449,628),r:66,color:'#ffc66b',kind:'C',label:'Flor amarilla derecha'},{...scenePoint(500,748),r:62,color:'#fff7ed',kind:'D',label:'Flor blanca inferior'},{...scenePoint(1185,775),r:64,color:'#83caff',kind:'E',label:'Flor azul inferior'}];const missions=[['1. Visita una flor','Acércate a la flor rosa con el aro brillante.'],['2. Recolecta alimento','Mantén la abeja sobre la flor para alimentarte.'],['3. Transporta el polen','Vuela hacia la segunda flor rosa. ¡Evita las flores de otras especies!'],['4. Deposita el polen','Permanece sobre la zona receptora de la flor rosa.'],['5. Comprueba lo aprendido','Identifica dónde terminó el polen y completa el desafío.']];function updateHUD(){ $('score').textContent='⭐ '+score+' puntos';$('level').textContent='🌼 Misión '+(stage+1)+'/5';$('missionTitle').textContent=missions[stage][0];$('missionText').textContent=missions[stage][1];$('stageDots').innerHTML=missions.map((_,i)=>`<span class="dot ${i<stage?'done':i===stage?'active':''}"></span>`).join('');$('bar').style.width=progress+'%'}function beep(freq=600){if(!sound)return;try{let ac=beep.ac||(beep.ac=new (window.AudioContext||window.webkitAudioContext)());let o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.045,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.16);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.17)}catch(e){}}function show(title,body,buttons='<button id="continue">Aceptar y continuar →</button>',art='🐝 🌸'){locked=true;target=null;overlay.classList.remove('hidden');modal.innerHTML=`<div class="art">${art}</div><h2>${title}</h2>${body}<div class="actions">${buttons}</div>`;const b=$('continue');if(b)b.onclick=()=>{overlay.classList.add('hidden');locked=false;paused=false;beep(740)}}function advance(title,body,art,buttonText='Aceptar y continuar →'){celebrateBee();score+=100;beep(850);show(title,body,'<button id="continue">'+buttonText+'</button>',art);stage=Math.min(stage+1,4);hold=0;progress=0;updateHUD()}function reset(){stage=0;score=0;started=false;paused=false;locked=true;hold=0;progress=0;visited=false;quizDone=false;bee={x:100,y:150,pollen:false};keys.clear();particles=[];updateHUD();show('¡Bienvenido al jardín!',`<p>Controla una abeja y descubre <b>cinco momentos de la polinización</b>. Visita flores, busca alimento, transporta el polen y deposítalo en otra flor de la misma especie.</p><p class="note">Usa las flechas, WASD, arrastra la abeja o toca el escenario. Las flores rosas son de la misma especie en este modelo didáctico.</p>`,'<button id="begin">🐝 ¡Comenzar aventura!</button>','🌻 🐝 🌷');$('begin').onclick=()=>{started=true;locked=false;overlay.classList.add('hidden');beep()}}function finishStage4(){show('¡El polen llegó al estigma!',`<p>Cuando la abeja se posa en otra flor, algunos granos de polen de su cuerpo pueden quedar sobre el <b>estigma</b>, la parte receptora de la flor.</p><div class="task"><b>Pequeño reto:</b> ¿Dónde debe depositarse el polen para que ocurra la polinización?<br><button id="q1">En el estigma</button><button id="q2">En los pétalos</button><div class="feedback" id="feedback"></div></div>`,'<button id="continue" disabled>Continuar →</button>','🐝 ✨ 🌸');$('q1').onclick=()=>{$('feedback').textContent='¡Correcto! El estigma recibe el polen.';$('continue').disabled=false;quizDone=true;beep(850)};$('q2').onclick=()=>{$('feedback').textContent='Los pétalos atraen visitantes, pero el estigma es la parte receptora.';beep(230)};$('continue').onclick=()=>{overlay.classList.add('hidden');locked=false;stage=4;score+=100;hold=0;progress=0;updateHUD()}}function end(){celebrateBee();score+=150;updateHUD();show('¡Polinización completada!',`<p>¡Lo lograste! La abeja visitó una flor, buscó alimento, recogió polen en su cuerpo, lo transportó y lo depositó en el estigma de otra flor compatible.</p><p><b>Recuerda:</b> la polinización es la transferencia de polen hasta el estigma. No es lo mismo que la fecundación.</p><p>🏆 <b>Puntuación final: ${score} puntos</b></p>`,'<button id="again">↻ Volver a jugar</button>','🏆 🐝 🌺');$('again').onclick=reset}
+function ellipse(x,y,rx,ry,color,rot=0){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.restore()}function flower(f,t){if(goal!==f)return;const pulse=matchMedia('(prefers-reduced-motion: reduce)').matches?0:5*Math.sin(t*3);ctx.save();ctx.strokeStyle=stage<=1?'#ffd338':'#66e59a';ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=18;ctx.lineWidth=6;ctx.setLineDash([15,10]);ctx.beginPath();ctx.arc(f.x,f.y,f.r+20+pulse,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;ctx.restore()}function drawBee(t){updateBeeAvatar(t)}function draw(t){let w=1000,h=540;if(backgroundReady){const scale=Math.max(w/background.naturalWidth,h/background.naturalHeight);const dw=background.naturalWidth*scale,dh=background.naturalHeight*scale;ctx.drawImage(background,(w-dw)/2,(h-dh)/2,dw,dh)}else{ctx.fillStyle='#79bf74';ctx.fillRect(0,0,w,h)}goal=stage<=1?flowers[0]:stage===2||stage===3?flowers[2]:null;flowers.forEach(f=>flower(f,t));if((stage===1||stage===3)&&goal){const bw=126,bh=12,bx=goal.x-bw/2,by=Math.min(520,goal.y+goal.r+30);ctx.fillStyle="#3d2a1dcc";ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);ctx.fill();ctx.fillStyle="#ffd33f";ctx.beginPath();ctx.roundRect(bx+3,by+3,(bw-6)*(progress/100),6,3);ctx.fill()}for(let p of particles){ellipse(p.x,p.y,p.r,p.r,p.color)}drawBee(t);if(stage===4){ctx.fillStyle='#fff7dfec';ctx.strokeStyle='#9e703c';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(315,35,370,83,17);ctx.fill();ctx.stroke();ctx.fillStyle='#63432a';ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.fillText('Haz clic en el estigma',500,68);ctx.font='15px system-ui';ctx.fillText('de la flor rosa de destino',500,94);ctx.strokeStyle='#ffda3d';ctx.lineWidth=6;ctx.beginPath();ctx.arc(flowers[2].x,flowers[2].y,25+Math.sin(t*5)*4,0,7);ctx.stroke()}}
+function tick(ms){if(!last)last=ms;let dt=Math.min((ms-last)/1000,.05);last=ms;let t=ms/1000;if(started&&!paused&&!locked){let dx=0,dy=0;if(keys.has('ArrowLeft')||keys.has('a'))dx--;if(keys.has('ArrowRight')||keys.has('d'))dx++;if(keys.has('ArrowUp')||keys.has('w'))dy--;if(keys.has('ArrowDown')||keys.has('s'))dy++;if(target){let x=target.x-bee.x,y=target.y-bee.y,d=Math.hypot(x,y);if(d>5){dx=x/d;dy=y/d}else target=null}let len=Math.hypot(dx,dy)||1;beeTilt=(dx||dy)?Math.max(-18,Math.min(18,Math.atan2(dy,dx)*10)):beeTilt*.84;bee.x=Math.max(40,Math.min(960,bee.x+dx/len*260*dt));bee.y=Math.max(55,Math.min(450,bee.y+dy/len*260*dt));let f=stage<=1?flowers[0]:flowers[2],d=Math.hypot(bee.x-f.x,bee.y-f.y);if(stage===0&&d<75){advance('¡Has encontrado una flor!','<div class="flower-lesson-image"><img src="IMG/1.webp" alt="Ilustración sobre el néctar y el polen"></div>','','Aceptar y continuar')}else if(stage===1){progress=d<78?Math.min(100,progress+dt*43):Math.max(0,progress-dt*25);if(progress>=100){bee.pollen=true;advance('¡El polen se adhiere!','<div class="flower-lesson-image"><img src="IMG/2.webp" alt="El polen adherido a la abeja"></div>','', 'Aceptar y continuar')}}else if(stage===2){if(d<85){advance('¡Has llegado a otra flor!',`<p>La abeja ha transportado el polen durante su vuelo hasta otra flor de la <b>misma especie</b>.</p><p>Ahora mantente cerca del centro de esta flor para representar el contacto con el estigma.</p>`,'🐝 🌷')}}else if(stage===3){progress=d<70?Math.min(100,progress+dt*42):Math.max(0,progress-dt*30);if(progress>=100){bee.pollen=false;progress=0;finishStage4()}}particles=particles.filter(p=>p.life>0);for(let p of particles){p.y-=p.v*dt;p.x+=Math.sin(t*3+p.y)*12*dt;p.life-=dt}if(Math.random()<.25&&bee.pollen)particles.push({x:bee.x+(Math.random()-.5)*38,y:bee.y+12,r:2+Math.random()*2,v:15+Math.random()*20,color:'#f7d44b',life:.7})}draw(t);updateHUD();requestAnimationFrame(tick)}function position(e){let rect=c.getBoundingClientRect();return{x:(e.clientX-rect.left)/rect.width*1000,y:(e.clientY-rect.top)/rect.height*540}}c.addEventListener('pointerdown',e=>{if(locked||paused)return;mouseDown=true;let p=position(e);if(stage===4){if(Math.hypot(p.x-flowers[2].x,p.y-flowers[2].y)<75){end()}else{show('Busca el estigma',`<p>El <b>estigma</b> está en el centro de la flor rosa de destino en esta representación. Haz clic allí para completar el proceso.</p>`,'<button id="continue">Volver al jardín</button>','🌸');}return}target=p;c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(mouseDown&&!locked)target=position(e)});c.addEventListener('pointerup',()=>mouseDown=false);window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();keys.add(e.key.toLowerCase().startsWith('arrow')?e.key:e.key.toLowerCase())});window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase().startsWith('arrow')?e.key:e.key.toLowerCase()));document.querySelectorAll('[data-key]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(b.dataset.key)});for(let ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});$('restart').onclick=reset;$('pause').onclick=()=>{if(!started||locked)return;paused=!paused;$('pause').textContent=paused?'▶ Reanudar':'⏸ Pausa';if(paused)show('Juego en pausa','<p>Tu abeja está descansando. Cuando quieras, continúa la misión.</p>','<button id="resume">▶ Continuar</button>','🐝 💤'),$('resume').onclick=()=>{overlay.classList.add('hidden');locked=false;paused=false;$('pause').textContent='⏸ Pausa'}};$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'🔊':'🔇'};reset();requestAnimationFrame(tick)})();
+</script><script>
+const backgroundMusic = new Audio('MUSIC/Audio1.mp3');
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.35;
+backgroundMusic.preload = 'auto';
+document.addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  if (button.id === 'begin') {
+    backgroundMusic.play().catch(() => {});
+  } else if (button.id === 'sound') {
+    if (button.textContent.includes('🔇')) {
+      backgroundMusic.pause();
+    } else {
+      backgroundMusic.play().catch(() => {});
+    }
+  } else if (button.id === 'restart' || button.id === 'again') {
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+  }
+});
+const modal = document.getElementById('modal');
+function formatWelcomeModal() {
+  modal.classList.add('welcome-modal');
+  const existingWelcome = modal.querySelector('.welcome-content');
+  if (existingWelcome) {
+    const existingBeginButton = modal.querySelector('#begin');
+    if (existingBeginButton && existingBeginButton.textContent !== '¡Comenzar aventura!') existingBeginButton.textContent = '¡Comenzar aventura!';
+    return;
+  }
+  const art = modal.querySelector('.art');
+  if (art) art.remove();
+  const oldParagraphs = modal.querySelectorAll(':scope > p');
+  oldParagraphs.forEach(paragraph => paragraph.remove());
+  const actions = modal.querySelector('.actions');
+  if (actions) actions.insertAdjacentHTML('beforebegin', `<div class="welcome-content">
+    <div class="welcome-intro">
+      <div class="welcome-bee-wrap"><img class="welcome-bee" src="abejita-protagonista.png" alt="Abejita sonriente lista para la aventura"></div>
+      <div class="welcome-copy">
+        <p class="welcome-lead">¡Nuestra abejita necesita tu ayuda!</p>
+        <p>Acompáñala a visitar las flores, recoger polen y llevarlo de una flor a otra. ¡Descubre cómo las abejas ayudan a las plantas!</p>
+      </div>
+    </div>
+    <section class="welcome-controls" aria-label="Instrucciones de movimiento">
+      <h3>¿Cómo puedes moverla?</h3>
+      <div class="control-options">
+        <div class="control-option"><div class="key-cluster arrow-keys"><kbd>↑</kbd><span><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></span></div><b>Flechas<br>del teclado</b></div>
+        <div class="control-option"><div class="key-cluster wasd-keys"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div><b>Teclas<br>WASD</b></div>
+        <div class="control-option"><div class="mouse-icon"><span></span></div><b>Arrastra la abejita<br>con el mouse</b></div>
+      </div>
+    </section>
+    <p class="welcome-final"><span aria-hidden="true">🌸</span> ¡Sigue los círculos del jardín para completar tu aventura!</p>
+  </div>`);
+  const beginButton = modal.querySelector('#begin');
+  if (beginButton) beginButton.textContent = '¡Comenzar aventura!';
+  if (beginButton) beginButton.insertAdjacentHTML('beforeend', '<span class="play-icon" aria-hidden="true">▶</span>');
+  const welcomeContent = modal.querySelector('.welcome-content');
+  if (welcomeContent) welcomeContent.querySelectorAll('.art').forEach(element => element.remove());
+}
+const modalObserver = new MutationObserver(() => {
+  const title = modal.querySelector('h2');
+  if (!title) return;
+  const continueButton = modal.querySelector('#continue');
+  if (continueButton && /Aceptar y continuar|Continuar →/.test(continueButton.textContent)) {
+    continueButton.textContent = 'Continuar';
+  }
+  if (title.textContent === '¡Bienvenido al jardín!') {
+    formatWelcomeModal();
+    return;
+  }
+  modal.classList.remove('welcome-modal');
+  if (title.textContent === '¡Has llegado a otra flor!') {
+    const art = modal.querySelector('.art');
+    if (art) art.remove();
+    modal.querySelectorAll('p').forEach(paragraph => {
+      if (paragraph.textContent.includes('Ahora mantente cerca del centro de esta flor para representar el contacto con el estigma.')) {
+        paragraph.remove();
+      }
+    });
+    const firstParagraph = modal.querySelector('p');
+    if (firstParagraph && !modal.querySelector('img[src="IMG/3.png"]')) {
+      firstParagraph.outerHTML = '<div class="flower-lesson-image"><img src="IMG/3.png" alt="La abeja transportando polen hasta otra flor" style="max-height:min(32vh,190px)"></div>';
+    }
+    return;
+  }
+  if (title.textContent === '¡El polen llegó al estigma!') {
+    const art = modal.querySelector('.art');
+    if (art) art.remove();
+    const firstParagraph = modal.querySelector('p');
+    if (firstParagraph && !modal.querySelector('img[src="IMG/4.png"]')) {
+      firstParagraph.outerHTML = '<div class="flower-lesson-image"><img src="IMG/4.png" alt="El polen depositándose en el estigma" style="max-height:min(32vh,190px)"></div>';
+    }
+    const task = modal.querySelector('.task');
+    if (task) task.remove();
+    const continueButton = modal.querySelector('#continue');
+    if (continueButton) continueButton.disabled = false;
+    return;
+  }
+  if (title.textContent === '¡Polinización completada!') {
+    const art = modal.querySelector('.art');
+    if (art) art.remove();
+    modal.querySelectorAll('p').forEach(paragraph => paragraph.remove());
+    if (!modal.querySelector('img[src="IMG/5.png"]')) {
+      const actions = modal.querySelector('.actions');
+      actions.insertAdjacentHTML('beforebegin', '<div class="flower-lesson-image"><img src="IMG/5.png" alt="Polinización completada" style="max-height:min(32vh,190px)"></div>');
+    }
+  }
+});
+modalObserver.observe(modal, {childList: true, subtree: true});
+if (modal.querySelector('h2')?.textContent === '¡Bienvenido al jardín!') {
+  formatWelcomeModal();
+}
+const leafPoint = document.createElement('button');
+leafPoint.id = 'leafPoint';
+leafPoint.type = 'button';
+leafPoint.textContent = '🍃';
+leafPoint.title = 'Explorar las hojas';
+leafPoint.setAttribute('aria-label', 'Explorar las hojas del árbol');
+leafPoint.style.cssText = 'display:none;position:absolute;left:87%;top:10%;width:58px;height:58px;padding:0;border-radius:50%;font-size:30px;z-index:4;background:#fff4a8cc;box-shadow:0 3px 0 #7c6428;';
+document.getElementById('game').appendChild(leafPoint);
+let leafTraveling = false;
+leafPoint.addEventListener('click', () => {
+  if (leafTraveling) return;
+  leafTraveling = true;
+  const canvas = document.getElementById('scene');
+  const pointRect = leafPoint.getBoundingClientRect();
+  canvas.dispatchEvent(new PointerEvent('pointerdown', {
+    bubbles: true,
+    clientX: pointRect.left + pointRect.width / 2,
+    clientY: pointRect.top + pointRect.height / 2,
+    pointerId: 1
+  }));
+  setTimeout(() => {
+    const continueButton = document.getElementById('continue');
+    if (continueButton) continueButton.click();
+    const beeAvatar = document.querySelector('.bee-avatar');
+    let lastKey = null;
+    const travel = setInterval(() => {
+      const beeRect = beeAvatar.getBoundingClientRect();
+      const targetRect = leafPoint.getBoundingClientRect();
+      const dx = targetRect.left + targetRect.width / 2 - (beeRect.left + beeRect.width / 2);
+      const dy = targetRect.top + targetRect.height / 2 - (beeRect.top + beeRect.height / 2);
+      if (Math.hypot(dx, dy) < 24) {
+        if (lastKey) window.dispatchEvent(new KeyboardEvent('keyup', {key: lastKey}));
+        clearInterval(travel);
+        leafTraveling = false;
+        modal.innerHTML = '<h2>Las hojas del árbol</h2><div class="flower-lesson-image"><img src="IMG/6.webp" alt="Ilustración de las hojas del árbol" style="max-height:min(32vh,190px)"></div><div class="actions"><button id="closeLeafPoint">Volver al jardín</button></div>';
+        overlay.classList.remove('hidden');
+        document.getElementById('closeLeafPoint').onclick = () => overlay.classList.add('hidden');
+        return;
+      }
+      const nextKey = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
+      if (lastKey !== nextKey) {
+        if (lastKey) window.dispatchEvent(new KeyboardEvent('keyup', {key: lastKey}));
+        window.dispatchEvent(new KeyboardEvent('keydown', {key: nextKey}));
+        lastKey = nextKey;
+      }
+    }, 60);
+  }, 80);
+});
+document.addEventListener('click', event => {
+  if (event.target.closest('#again')) leafPoint.style.display = 'none';
+});
+const finalPoint = document.createElement('button');
+finalPoint.id = 'finalPoint';
+finalPoint.type = 'button';
+finalPoint.textContent = '🍃';
+finalPoint.title = 'Punto final de la aventura';
+finalPoint.setAttribute('aria-label', 'Ir al punto final de la aventura');
+finalPoint.style.cssText = 'display:none;position:absolute;left:87%;top:10%;width:70px;height:70px;padding:0;border:6px dashed #66e59a;border-radius:50%;font-size:30px;z-index:5;background:#fff4a8cc;box-shadow:0 0 18px #66e59a;animation:finalPointPulse 1.3s ease-in-out infinite;';
+document.getElementById('game').appendChild(finalPoint);
+const finalPointStyle = document.createElement('style');
+finalPointStyle.textContent = '@keyframes finalPointPulse{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.08);opacity:1}}';
+document.head.appendChild(finalPointStyle);
+
+let finalWindowShown = false;
+let freeFlight = false;
+let additionalPointsActive = false;
+let travelTimer = null;
+let travelKey = null;
+const pointArmed = {honey: true, leaves: true};
+const visitedPoints = {honey: false, leaves: false};
+let finalChoicesShown = false;
+
+function stopTravel() {
+  if (travelTimer) clearInterval(travelTimer);
+  travelTimer = null;
+  if (travelKey) window.dispatchEvent(new KeyboardEvent('keyup', {key: travelKey}));
+  travelKey = null;
+}
+
+function hideAdditionalPoints() {
+  honeyPoint.style.display = 'none';
+  leavesPoint.style.display = 'none';
+  additionalPointsActive = false;
+  pointArmed.honey = true;
+  pointArmed.leaves = true;
+  stopTravel();
+}
+
+function showFinalChoices() {
+  if (finalChoicesShown) return;
+  finalChoicesShown = true;
+  hideAdditionalPoints();
+  finalChoices.style.display = 'flex';
+}
+
+function syncFiveMissionHUD() {
+  const level = document.getElementById('level');
+  const match = level.textContent.match(/Misión (\d+)\//);
+  const missionNumber = match ? Math.min(5, Number(match[1])) : 1;
+  level.textContent = `🌼 Misión ${missionNumber}/5`;
+  document.getElementById('stageDots').innerHTML = Array.from({length: 5}, (_, index) => `<span class="dot ${index < missionNumber - 1 ? 'done' : index === missionNumber - 1 ? 'active' : ''}"></span>`).join('');
+}
+
+function openFifthMissionWindow() {
+  if (finalWindowShown) return;
+  finalWindowShown = true;
+  modal.innerHTML = '<h2>¡Polinización completada!</h2><div class="flower-lesson-image"><img src="IMG/5.png" alt="Polinización completada" style="max-height:min(32vh,190px)"></div><div class="actions"><button id="acceptFifthMission">Aceptar</button></div>';
+  overlay.classList.remove('hidden');
+  document.getElementById('acceptFifthMission').onclick = () => {
+    overlay.classList.add('hidden');
+    freeFlight = true;
+    window.freeFlightMode = true;
+    additionalPointsActive = true;
+    honeyPoint.style.display = 'block';
+    leavesPoint.style.display = 'block';
+  };
+}
+
+function openAdditionalPoint(pointType) {
+  pointArmed[pointType] = false;
+  const content = pointType === 'honey'
+    ? '<h2>El panal de abejas</h2><div style="display:flex;justify-content:center;align-items:center;width:100%;margin:6px 0 10px"><video controls playsinline preload="metadata" src="IMG/panal.mp4" aria-label="Video sobre el panal de abejas" style="display:block;width:auto;max-width:100%;height:auto;max-height:min(52vh,300px);object-fit:contain;border-radius:12px"></video></div>'
+    : '<h2>Las hojas del árbol</h2><div class="flower-lesson-image"><img src="IMG/6.webp" alt="Ilustración de las hojas del árbol" style="max-height:min(32vh,190px)"></div>';
+  modal.innerHTML = `${content}<div class="actions"><button id="acceptAdditionalPoint">Aceptar</button></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('acceptAdditionalPoint').onclick = () => {
+    const video = modal.querySelector('video');
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    overlay.classList.add('hidden');
+    stopTravel();
+    visitedPoints[pointType] = true;
+    if (visitedPoints.honey && visitedPoints.leaves) showFinalChoices();
+  };
+}
+
+function travelBeeTo(rect) {
+  const beeAvatar = document.querySelector('.bee-avatar');
+  if (!beeAvatar) return;
+  stopTravel();
+  travelTimer = setInterval(() => {
+    const beeRect = beeAvatar.getBoundingClientRect();
+    const dx = rect.left + rect.width / 2 - (beeRect.left + beeRect.width / 2);
+    const dy = rect.top + rect.height / 2 - (beeRect.top + beeRect.height / 2);
+    if (Math.hypot(dx, dy) < 24) {
+      stopTravel();
+      return;
+    }
+    const nextKey = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
+    if (travelKey !== nextKey) {
+      if (travelKey) window.dispatchEvent(new KeyboardEvent('keyup', {key: travelKey}));
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: nextKey}));
+      travelKey = nextKey;
+    }
+  }, 60);
+}
+
+function createAdditionalPoint(id, label, position) {
+  const point = document.createElement('button');
+  point.id = id;
+  point.type = 'button';
+  point.textContent = '🍃';
+  point.title = label;
+  point.setAttribute('aria-label', label);
+  point.style.cssText = `display:none;position:absolute;left:${position.left};top:${position.top};width:70px;height:70px;padding:0;border:6px dashed #66e59a;border-radius:50%;font-size:30px;z-index:5;background:#fff4a8cc;box-shadow:0 0 18px #66e59a;animation:finalPointPulse 1.3s ease-in-out infinite;`;
+  document.getElementById('game').appendChild(point);
+  point.addEventListener('click', event => {
+    event.preventDefault();
+    if (additionalPointsActive) travelBeeTo(point.getBoundingClientRect());
+  });
+  return point;
+}
+
+const honeyPoint = createAdditionalPoint('honeyPoint', 'Explorar el panal', {left: '18.5%', top: '13.5%'});
+const leavesPoint = createAdditionalPoint('leavesPoint', 'Explorar las hojas', {left: '87%', top: '13.5%'});
+honeyPoint.textContent = '🍯';
+leavesPoint.textContent = '🍃';
+
+const finalChoices = document.createElement('div');
+finalChoices.id = 'finalChoices';
+finalChoices.style.cssText = 'display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex-direction:column;align-items:center;z-index:8;animation:finalChoiceIn .45s ease-out both;';
+finalChoices.innerHTML = '<button id="startTourButton" type="button">Iniciar recorrido</button>';
+const finalChoiceStyle = document.createElement('style');
+finalChoiceStyle.textContent = '#finalChoices button{min-width:220px;min-height:58px;padding:12px 22px;border:4px solid #c77b36;border-radius:18px;background:linear-gradient(#e89a4c,#a85224);color:#fff7df;font:900 18px/1.1 system-ui,sans-serif;white-space:nowrap;box-shadow:0 7px 0 #6c321b,0 10px 18px #0005;text-shadow:1px 2px #69321b}#finalChoices button:hover{filter:brightness(1.08)}#finalChoices button:active{transform:translateY(4px);box-shadow:0 3px 0 #6c321b}@keyframes finalChoiceIn{from{opacity:0;transform:translate(-50%,-45%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}';
+document.head.appendChild(finalChoiceStyle);
+document.getElementById('game').appendChild(finalChoices);
+document.getElementById('startTourButton').onclick = () => {
+  finalChoices.style.display = 'none';
+  finalChoicesShown = false;
+  visitedPoints.honey = false;
+  visitedPoints.leaves = false;
+  document.getElementById('restart').click();
+};
+const gameCanvas = document.getElementById('scene');
+gameCanvas.addEventListener('pointerdown', event => {
+  const canvasRect = gameCanvas.getBoundingClientRect();
+  const clickX = (event.clientX - canvasRect.left) / canvasRect.width * 1000;
+  const clickY = (event.clientY - canvasRect.top) / canvasRect.height * 540;
+  const missionTitle = document.getElementById('missionTitle').textContent;
+  if (!finalWindowShown && !freeFlight && overlay.classList.contains('hidden') && missionTitle === '5. Comprueba lo aprendido' && Math.hypot(clickX - 664, clickY - 315) < 95) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openFifthMissionWindow();
+    return;
+  }
+  if (!freeFlight) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  travelBeeTo({left: event.clientX - 1, top: event.clientY - 1, width: 2, height: 2});
+}, true);
+
+setInterval(() => {
+  if (!finalWindowShown && !freeFlight) syncFiveMissionHUD();
+  if (finalWindowShown || freeFlight) {
+    document.getElementById('score').textContent = '⭐ 550 puntos';
+    document.getElementById('level').textContent = '🌼 Misión 5/5';
+    document.getElementById('stageDots').innerHTML = Array.from({length: 5}, () => '<span class="dot done"></span>').join('');
+  }
+  if (!additionalPointsActive || !freeFlight || !overlay.classList.contains('hidden')) return;
+  const beeAvatar = document.querySelector('.bee-avatar');
+  if (!beeAvatar) return;
+  const beeRect = beeAvatar.getBoundingClientRect();
+  for (const [point, type] of [[honeyPoint, 'honey'], [leavesPoint, 'leaves']]) {
+    const pointRect = point.getBoundingClientRect();
+    const dx = pointRect.left + pointRect.width / 2 - (beeRect.left + beeRect.width / 2);
+    const dy = pointRect.top + pointRect.height / 2 - (beeRect.top + beeRect.height / 2);
+    const distance = Math.hypot(dx, dy);
+    if (distance > 55) pointArmed[type] = true;
+    if (distance < 24 && pointArmed[type]) {
+      stopTravel();
+      openAdditionalPoint(type);
+      break;
+    }
+  }
+}, 80);
+
+window.freeFlightMode = false;
+const canvasMethodsHiddenInFreeFlight = ['fillText', 'roundRect', 'arc', 'stroke', 'fill'];
+canvasMethodsHiddenInFreeFlight.forEach(methodName => {
+  const originalMethod = CanvasRenderingContext2D.prototype[methodName];
+  if (typeof originalMethod !== 'function') return;
+  CanvasRenderingContext2D.prototype[methodName] = function(...args) {
+    if (window.freeFlightMode) return;
+    return originalMethod.apply(this, args);
+  };
+});
+document.getElementById('restart').addEventListener('click', () => {
+  finalWindowShown = false;
+  freeFlight = false;
+  window.freeFlightMode = false;
+  hideAdditionalPoints();
+  finalChoices.style.display = 'none';
+  finalChoicesShown = false;
+  visitedPoints.honey = false;
+  visitedPoints.leaves = false;
+});
+const mission4Hint = document.createElement('div');
+mission4Hint.id = 'mission4Hint';
+mission4Hint.textContent = '¡Mantén a la abejita dentro del círculo hasta llenar la barra de progreso!';
+mission4Hint.style.cssText = 'display:none;position:absolute;left:50%;top:8%;transform:translateX(-50%);width:min(360px,72%);padding:10px 14px;border:3px solid #9e703c;border-radius:16px;background:#fff7dfec;color:#63432a;box-shadow:0 6px 0 #3b281d70;font:700 15px/1.3 system-ui;text-align:center;z-index:6;pointer-events:none;';
+document.getElementById('game').appendChild(mission4Hint);
+setInterval(() => {
+  const mission4Active = document.getElementById('missionTitle').textContent === '4. Deposita el polen';
+  mission4Hint.style.display = mission4Active && overlay.classList.contains('hidden') ? 'block' : 'none';
+}, 80);
+const pauseButton = document.getElementById('pause');
+pauseButton.textContent = 'Ⅱ';
+pauseButton.addEventListener('click', () => {
+  pauseButton.textContent = pauseButton.textContent.includes('▶') ? '▶' : 'Ⅱ';
+  if (pauseButton.textContent === '▶') backgroundMusic.pause();
+});
+document.addEventListener('click', event => {
+  if (event.target.closest('#resume')) {
+    pauseButton.textContent = 'Ⅱ';
+    const soundButton = document.getElementById('sound');
+    if (!soundButton.textContent.includes('🔇')) backgroundMusic.play().catch(() => {});
+  }
+});
+</script></body></html>

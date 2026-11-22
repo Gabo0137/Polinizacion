@@ -1,0 +1,20 @@
+<defs>
+  <linearGradient id="beeBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7a0"/><stop offset=".3" stop-color="#ffd347"/><stop offset=".72" stop-color="#ed941c"/><stop offset="1" stop-color="#8f431b"/></linearGradient>
+  <radialGradient id="beeHead" cx="28%" cy="20%"><stop stop-color="#fffbd0"/><stop offset=".38" stop-color="#ffd94d"/><stop offset="1" stop-color="#d77917"/></radialGradient>
+  <linearGradient id="beeWing" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5ffcc"/><stop offset=".48" stop-color="#e7cfff99"/><stop offset="1" stop-color="#8fd9f477"/></linearGradient>
+  <filter id="beeSoft"><feGaussianBlur stdDeviation="1.4"/></filter>
+</defs>
+<g class="bee-body">
+  <path class="bee-wing left" d="M47 37C8 40 2 14 19 8c23-8 43 6 47 22Z"/><path class="bee-wing right" d="M76 34C98 1 127 8 128 25c1 19-22 28-49 20Z"/>
+  <path class="bee-wing-vein" d="M18 13q19 10 42 17M13 25q22 0 43 5M106 14q-13 12-28 25M122 22q-18 5-34 16M31 12q10 10 17 26M99 13q-5 12-16 26"/>
+  <path class="bee-leg" d="M45 73q-11 13-20 11M58 78q-4 17-15 19M73 80q0 15-8 21M86 75q10 12 18 7"/><path class="bee-leg back" d="M50 80q-10 16-5 23M78 79q8 13 17 17"/>
+  <path class="bee-fuzz" d="M29 44q4-12 13-16M33 72q16 9 37 10M42 82q18 8 36 1M90 47q7 9 6 18"/>
+  <ellipse cx="69" cy="57" rx="44" ry="30" fill="#5a3022" opacity=".42" filter="url(#beeSoft)"/><ellipse cx="68" cy="55" rx="42" ry="28" fill="url(#beeBody)" stroke="#67331f" stroke-width="2"/>
+  <path d="M43 30v54M65 28v58M88 34v43" fill="none" stroke="#42251f" stroke-width="11" opacity=".96"/>
+  <path d="M27 28q-10-21-21-14M47 28q9-21 21-13" fill="none" stroke="#563022" stroke-width="4" stroke-linecap="round"/><circle cx="29" cy="18" r="2.5" fill="#ffd66c"/><circle cx="67" cy="16" r="2.5" fill="#ffd66c"/>
+  <ellipse cx="39" cy="48" rx="27" ry="26" fill="url(#beeHead)" stroke="#733719" stroke-width="2"/><path class="bee-brow" d="M24 34q7-7 14-2M43 31q8-5 14 2"/>
+  <ellipse class="bee-eye" cx="29" cy="45" rx="10" ry="13"/><ellipse class="bee-eye" cx="51" cy="43" rx="10" ry="13"/><ellipse class="bee-pupil" cx="31" cy="47" rx="4" ry="7"/><ellipse class="bee-pupil" cx="53" cy="45" rx="4" ry="7"/><circle cx="33" cy="43" r="2.4" fill="white"/><circle cx="55" cy="41" r="2.4" fill="white"/>
+  <ellipse cx="20" cy="56" rx="7" ry="4.5" fill="#f08078" opacity=".72"/><ellipse cx="57" cy="54" rx="7" ry="4.5" fill="#f08078" opacity=".72"/><path class="bee-smile" d="M29 57q9 12 20 0"/><path class="bee-tongue" d="M37 65q5-6 10 0-2 7-5 7t-5-7Z"/>
+  <path d="M102 52q19-10 27 4-6 15-26 10" fill="#f2aa28" stroke="#71371d" stroke-width="2"/><path d="M119 53q9 5 6 14" fill="none" stroke="#5a2d1f" stroke-width="2"/>
+  <g id="bee-pollen" style="display:none"><circle class="pollen" cx="48" cy="62" r="4.5"/><circle class="pollen" cx="68" cy="72" r="4"/><circle class="pollen" cx="88" cy="58" r="4.5"/><circle class="pollen" cx="59" cy="47" r="3.5"/><circle class="pollen" cx="30" cy="78" r="3.5"/></g>
+</g>
