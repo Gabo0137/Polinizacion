@@ -437,6 +437,14 @@ finalReferenceLayoutStyle.textContent = `
   }
 `;
 document.head.appendChild(finalReferenceLayoutStyle);
+const finalOverlayFixStyle = document.createElement('style');
+finalOverlayFixStyle.textContent = `
+  #finalChoices{left:0 !important;top:0 !important;right:0 !important;bottom:0 !important;width:100% !important;height:100% !important;transform:none !important}
+  #finalChoices .completion-card{width:min(630px,calc(100% - 30px));max-height:calc(100% - 30px);overflow:hidden}
+  #finalChoices .excellent-image{width:100%;height:auto;max-width:100%;max-height:none;aspect-ratio:666 / 375;object-fit:contain}
+  @media(max-width:650px){#finalChoices .completion-card{width:calc(100% - 20px);max-height:calc(100% - 20px)}}
+`;
+document.head.appendChild(finalOverlayFixStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
