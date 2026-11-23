@@ -297,6 +297,23 @@ const leavesPoint = createAdditionalPoint('leavesPoint', 'Explorar las hojas', {
 honeyPoint.textContent = '🍯';
 leavesPoint.textContent = '🍃';
 
+function syncAdditionalPointPositions() {
+  const game = document.getElementById('game');
+  const canvas = document.getElementById('scene');
+  const gameRect = game.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const place = (point, x, y) => {
+    point.style.left = `${canvasRect.left - gameRect.left + canvasRect.width * x}px`;
+    point.style.top = `${canvasRect.top - gameRect.top + canvasRect.height * y}px`;
+  };
+  place(honeyPoint, 0.185, 0.135);
+  place(leavesPoint, 0.87, 0.135);
+}
+
+window.addEventListener('resize', syncAdditionalPointPositions);
+window.addEventListener('orientationchange', () => setTimeout(syncAdditionalPointPositions, 100));
+setTimeout(syncAdditionalPointPositions, 0);
+
 const finalChoices = document.createElement('div');
 finalChoices.id = 'finalChoices';
 finalChoices.style.cssText = 'display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex-direction:column;align-items:center;z-index:8;animation:finalChoiceIn .45s ease-out both;';
