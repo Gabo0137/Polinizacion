@@ -417,6 +417,15 @@ missionModalStyle.textContent = `
   }
 `;
 document.head.appendChild(missionModalStyle);
+const finalGreenButtonStyle = document.createElement('style');
+finalGreenButtonStyle.textContent = `
+  #finalChoices .excellent-image{max-height:min(52vh,330px);margin-bottom:16px}
+  #finalChoices #finishTourButton{padding:12px 18px;border:2px solid #c2f0a1;border-radius:15px;background:linear-gradient(180deg,#82d58c,#347c57);color:#fff8d8;box-shadow:0 5px 0 #153f30,0 8px 18px #0004;font:900 15px/1.1 system-ui,sans-serif;text-shadow:none}
+  #finalChoices #finishTourButton:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 7px 0 #153f30,0 12px 20px #0005}
+  #finalChoices #finishTourButton:active{transform:translateY(3px);box-shadow:0 1px 0 #153f30}
+  @media(max-width:650px){#finalChoices .excellent-image{max-height:min(46vh,230px);margin-bottom:12px}#finalChoices #finishTourButton{padding:11px 17px;font-size:14px}}
+`;
+document.head.appendChild(finalGreenButtonStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
