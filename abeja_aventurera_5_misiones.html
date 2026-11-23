@@ -426,6 +426,17 @@ finalGreenButtonStyle.textContent = `
   @media(max-width:650px){#finalChoices .excellent-image{max-height:min(46vh,230px);margin-bottom:12px}#finalChoices #finishTourButton{padding:11px 17px;font-size:14px}}
 `;
 document.head.appendChild(finalGreenButtonStyle);
+const finalReferenceLayoutStyle = document.createElement('style');
+finalReferenceLayoutStyle.textContent = `
+  #finalChoices .completion-card{width:min(630px,100%);height:auto;min-height:0;max-height:94%;padding:20px 24px;overflow:hidden;display:block}
+  #finalChoices .excellent-image{display:block;width:100%;max-width:100%;height:auto;max-height:none;aspect-ratio:666 / 375;object-fit:contain;margin:0 auto 16px}
+  #finalChoices #finishTourButton{display:inline-block;margin:0 auto}
+  @media(max-width:650px){
+    #finalChoices .completion-card{width:100%;padding:15px;border-width:5px;border-radius:25px}
+    #finalChoices .excellent-image{width:100%;margin-bottom:12px}
+  }
+`;
+document.head.appendChild(finalReferenceLayoutStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
