@@ -400,6 +400,23 @@ finalFitStyle.textContent = `
   }
 `;
 document.head.appendChild(finalFitStyle);
+const missionModalStyle = document.createElement('style');
+missionModalStyle.textContent = `
+  /* La pantalla final comparte el mismo lenguaje visual que .modal. */
+  #finalChoices{inset:0;padding:15px;background:#061b19c7;backdrop-filter:blur(8px);z-index:12}
+  #finalChoices .completion-card{display:block;width:min(630px,100%);height:auto;min-height:0;max-height:94%;overflow:hidden;padding:20px 24px;text-align:center;color:#4b321f;background:linear-gradient(150deg,#fff8df,#f6df9d 62%,#e9b65d);border:5px solid #d49b3d;border-radius:28px;box-shadow:inset 0 2px 0 #fff8bd,0 14px 0 #39251d88,0 28px 60px #0009}
+  #finalChoices .excellent-image{display:block;width:auto;max-width:100%;height:auto;max-height:min(42vh,300px);margin:0 auto 16px;object-fit:contain;border-radius:12px}
+  #finalChoices #finishTourButton{display:inline-block;min-width:0;min-height:0;margin:0;padding:12px 18px;border:2px solid #ffe99b;border-radius:15px;background:linear-gradient(180deg,#ffe47d,#d99225);color:#523017;box-shadow:0 5px 0 #6b3d1e,0 8px 18px #0004;font:900 15px/1.1 system-ui,sans-serif;text-shadow:none}
+  #finalChoices #finishTourButton:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 7px 0 #6b3d1e,0 12px 20px #0005}
+  #finalChoices #finishTourButton:active{transform:translateY(3px);box-shadow:0 1px 0 #6b3d1e}
+  @media(max-width:650px){
+    #finalChoices{padding:15px}
+    #finalChoices .completion-card{padding:15px;border-width:5px;border-radius:25px}
+    #finalChoices .excellent-image{max-height:min(42vh,220px);margin-bottom:12px}
+    #finalChoices #finishTourButton{padding:11px 17px;font-size:14px}
+  }
+`;
+document.head.appendChild(missionModalStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
