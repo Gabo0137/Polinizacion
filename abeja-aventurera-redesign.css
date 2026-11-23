@@ -347,3 +347,21 @@ kbd{min-width:clamp(22px,2.5vw,31px);height:clamp(22px,3.8vh,30px);font-size:cla
   .welcome-modal #begin{padding:6px 38px 6px 9px;font-size:14px;border-width:2px}
   .play-icon{right:5px;width:24px;height:24px;font-size:11px}
 }
+
+/* Evita que el borde inferior quede oculto detrás de la barra del sistema en móviles. */
+@supports (height:100dvh){
+  html,body{
+    min-height:100dvh;
+    height:auto;
+  }
+  body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding-bottom:calc(4px + env(safe-area-inset-bottom));
+  }
+  #app{
+    height:auto;
+    min-height:calc(100dvh - 8px - env(safe-area-inset-bottom));
+    max-height:none;
+  }
+}
