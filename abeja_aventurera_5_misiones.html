@@ -211,13 +211,7 @@ function showFinalChoices() {
   hideAdditionalPoints();
   finalChoices.innerHTML = `
     <div class="completion-card" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
-      <div class="completion-stars" aria-hidden="true">★ ★ ★</div>
-      <div class="completion-banner"><h2 id="completionTitle">¡Excelente!</h2></div>
-      <p class="completion-subtitle">Has completado la misión</p>
-      <div class="completion-content">
-        <img src="IMG/5.png" alt="Abeja completando la polinización">
-        <div><h3>¿Qué es la polinización?</h3><p>Es el proceso en el que el <b>polen</b> se traslada de una flor a otra, permitiendo que las plantas formen <b>frutos y semillas</b>.</p></div>
-      </div>
+      <img class="excellent-image" src="IMG/Excelente.png" alt="¡Excelente! Has completado la misión">
       <button id="finishTourButton" type="button">Finalizar</button>
     </div>`;
   finalChoices.style.display = 'flex';
@@ -369,6 +363,18 @@ compactCompletionStyle.textContent = `
   }
 `;
 document.head.appendChild(compactCompletionStyle);
+const imageCompletionStyle = document.createElement('style');
+imageCompletionStyle.textContent = `
+  #finalChoices .completion-card{width:min(900px,96%);max-height:96%;overflow:hidden;padding:14px 18px 18px;align-items:center;gap:12px}
+  #finalChoices .excellent-image{display:block;width:100%;height:auto;max-height:calc(100% - 68px);object-fit:contain;border-radius:14px}
+  #finalChoices #finishTourButton{display:block;margin:0 auto;min-width:220px;padding:10px 28px}
+  @media(max-width:650px){
+    #finalChoices .completion-card{width:min(96%,720px);padding:8px 10px 12px;gap:8px}
+    #finalChoices .excellent-image{max-height:calc(100% - 54px);border-radius:10px}
+    #finalChoices #finishTourButton{min-width:180px;min-height:38px;padding:6px 22px;font-size:19px}
+  }
+`;
+document.head.appendChild(imageCompletionStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
