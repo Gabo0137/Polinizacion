@@ -209,12 +209,8 @@ function showFinalChoices() {
   if (finalChoicesShown) return;
   finalChoicesShown = true;
   hideAdditionalPoints();
-  finalChoices.innerHTML = `
-    <div class="completion-card" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
-      <img class="excellent-image" src="IMG/Excelente.png" alt="¡Excelente! Has completado la misión">
-      <button id="finishTourButton" type="button">Finalizar</button>
-    </div>`;
-  finalChoices.style.display = 'flex';
+  modal.innerHTML = '<h2>¡Excelente!</h2><div class="flower-lesson-image"><img src="IMG/Excelente.png" alt="¡Excelente! Has completado la misión" style="display:block;width:100%;height:auto;max-height:min(52vh,360px);object-fit:contain;border-radius:12px"></div><div class="actions"><button id="finishTourButton" class="secondary" type="button">Finalizar</button></div>';
+  overlay.classList.remove('hidden');
   document.getElementById('finishTourButton').onclick = () => { window.location.href = 'index.html'; };
 }
 
