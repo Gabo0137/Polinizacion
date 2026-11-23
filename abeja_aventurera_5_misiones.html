@@ -388,6 +388,18 @@ finalVisualTuningStyle.textContent = `
   }
 `;
 document.head.appendChild(finalVisualTuningStyle);
+const finalFitStyle = document.createElement('style');
+finalFitStyle.textContent = `
+  #finalChoices .completion-card{width:min(920px,calc(100% - 12px));height:calc(100% - 12px);max-height:calc(100% - 12px);padding:12px 18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;overflow:hidden}
+  #finalChoices .excellent-image{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100% - 64px);object-fit:contain;flex:0 1 auto}
+  #finalChoices #finishTourButton{flex:0 0 auto;margin:0 auto;min-width:155px;min-height:38px;padding:7px 20px;font-size:18px}
+  @media(max-width:650px){
+    #finalChoices .completion-card{width:calc(100% - 12px);height:calc(100% - 10px);max-height:calc(100% - 10px);padding:8px 10px 10px;gap:7px}
+    #finalChoices .excellent-image{max-height:calc(100% - 55px)}
+    #finalChoices #finishTourButton{min-width:145px;min-height:35px;padding:6px 17px;font-size:17px}
+  }
+`;
+document.head.appendChild(finalFitStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
