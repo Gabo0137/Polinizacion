@@ -209,7 +209,19 @@ function showFinalChoices() {
   if (finalChoicesShown) return;
   finalChoicesShown = true;
   hideAdditionalPoints();
+  finalChoices.innerHTML = `
+    <div class="completion-card" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
+      <div class="completion-stars" aria-hidden="true">★ ★ ★</div>
+      <div class="completion-banner"><h2 id="completionTitle">¡Excelente!</h2></div>
+      <p class="completion-subtitle">Has completado la misión</p>
+      <div class="completion-content">
+        <img src="IMG/5.png" alt="Abeja completando la polinización">
+        <div><h3>¿Qué es la polinización?</h3><p>Es el proceso en el que el <b>polen</b> se traslada de una flor a otra, permitiendo que las plantas formen <b>frutos y semillas</b>.</p></div>
+      </div>
+      <button id="finishTourButton" type="button">Finalizar</button>
+    </div>`;
   finalChoices.style.display = 'flex';
+  document.getElementById('finishTourButton').onclick = () => { window.location.href = 'index.html'; };
 }
 
 function syncFiveMissionHUD() {
@@ -317,18 +329,29 @@ setTimeout(syncAdditionalPointPositions, 0);
 const finalChoices = document.createElement('div');
 finalChoices.id = 'finalChoices';
 finalChoices.style.cssText = 'display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex-direction:column;align-items:center;z-index:8;animation:finalChoiceIn .45s ease-out both;';
-finalChoices.innerHTML = '<button id="startTourButton" type="button">Iniciar recorrido</button>';
+finalChoices.innerHTML = '';
 const finalChoiceStyle = document.createElement('style');
 finalChoiceStyle.textContent = '#finalChoices button{min-width:220px;min-height:58px;padding:12px 22px;border:4px solid #c77b36;border-radius:18px;background:linear-gradient(#e89a4c,#a85224);color:#fff7df;font:900 18px/1.1 system-ui,sans-serif;white-space:nowrap;box-shadow:0 7px 0 #6c321b,0 10px 18px #0005;text-shadow:1px 2px #69321b}#finalChoices button:hover{filter:brightness(1.08)}#finalChoices button:active{transform:translateY(4px);box-shadow:0 3px 0 #6c321b}@keyframes finalChoiceIn{from{opacity:0;transform:translate(-50%,-45%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}';
 document.head.appendChild(finalChoiceStyle);
+const completionStyle = document.createElement('style');
+completionStyle.textContent = `
+  #finalChoices{inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#102d2acc;backdrop-filter:blur(4px);z-index:12}
+  #finalChoices .completion-card{position:relative;width:min(880px,100%);max-height:94%;overflow:auto;padding:18px 28px 24px;text-align:center;color:#5a321f;background:linear-gradient(160deg,#fff9df,#f6df9f 62%,#e9b65d);border:6px solid #d49b3d;border-radius:30px;box-shadow:inset 0 2px 0 #fff8bd,0 14px 0 #39251d88,0 24px 55px #0009}
+  #finalChoices .completion-stars{margin:-8px 0 -4px;color:#ffd83d;font-size:clamp(28px,5vw,54px);line-height:1;text-shadow:0 3px 0 #a86b21,0 0 8px #fff2a0;letter-spacing:clamp(2px,1vw,12px)}
+  #finalChoices .completion-banner{display:inline-block;margin:0 auto;padding:7px 28px 10px;background:linear-gradient(#2f9d35,#18752a);border:4px solid #155a25;border-radius:18px;box-shadow:0 6px 0 #10421f,0 8px 15px #0004;transform:rotate(-1deg)}
+  #finalChoices .completion-banner h2{margin:0;color:#fff4b0;font-size:clamp(30px,6vw,66px);line-height:1;text-shadow:0 4px 0 #8b4e19,0 0 2px #5a2c16}
+  #finalChoices .completion-subtitle{margin:15px 0 12px;font-size:clamp(18px,3vw,30px);font-weight:900;color:#7a4324}
+  #finalChoices .completion-content{display:flex;align-items:center;gap:20px;margin:0 auto;padding:16px 20px;text-align:left;background:#fff5d9;border:3px dashed #e3ad4b;border-radius:24px;box-shadow:inset 0 0 18px #fff}
+  #finalChoices .completion-content img{display:block;width:min(38%,280px);height:auto;max-height:240px;object-fit:contain;border-radius:14px}
+  #finalChoices .completion-content h3{margin:0 0 8px;color:#7c4a23;font-size:clamp(20px,3vw,32px)}
+  #finalChoices .completion-content p{margin:0;font-size:clamp(16px,2vw,23px);line-height:1.35}
+  #finalChoices #finishTourButton{margin-top:18px;min-width:min(280px,90%);padding:13px 30px;border:4px solid #2c7022;border-radius:20px;background:linear-gradient(#a5e55a,#4ba532);color:#fff9db;font-size:clamp(20px,3vw,30px);font-weight:1000;box-shadow:0 6px 0 #28601d,0 10px 18px #0005;text-shadow:0 2px 0 #28601d}
+  #finalChoices #finishTourButton:hover{filter:brightness(1.08);transform:translateY(-2px)}
+  #finalChoices #finishTourButton:active{transform:translateY(3px);box-shadow:0 3px 0 #28601d}
+  @media(max-width:650px){#finalChoices{padding:8px}#finalChoices .completion-card{padding:10px 12px 15px;border-width:4px;border-radius:22px}#finalChoices .completion-stars{font-size:30px}#finalChoices .completion-banner{padding:6px 18px 8px;border-width:3px}#finalChoices .completion-subtitle{margin:9px 0 7px;font-size:19px}#finalChoices .completion-content{gap:8px;padding:8px 9px;border-radius:16px}#finalChoices .completion-content img{width:34%;max-height:130px}#finalChoices .completion-content h3{margin-bottom:4px;font-size:18px}#finalChoices .completion-content p{font-size:13px;line-height:1.2}#finalChoices #finishTourButton{margin-top:10px;min-height:46px;padding:8px 20px;font-size:20px;border-width:3px}}
+`;
+document.head.appendChild(completionStyle);
 document.getElementById('game').appendChild(finalChoices);
-document.getElementById('startTourButton').onclick = () => {
-  finalChoices.style.display = 'none';
-  finalChoicesShown = false;
-  visitedPoints.honey = false;
-  visitedPoints.leaves = false;
-  document.getElementById('restart').click();
-};
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
   const canvasRect = gameCanvas.getBoundingClientRect();
