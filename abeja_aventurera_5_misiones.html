@@ -375,6 +375,19 @@ imageCompletionStyle.textContent = `
   }
 `;
 document.head.appendChild(imageCompletionStyle);
+const finalVisualTuningStyle = document.createElement('style');
+finalVisualTuningStyle.textContent = `
+  #finalChoices{padding:0;background:transparent;backdrop-filter:none}
+  #finalChoices .completion-card{width:min(920px,calc(100% - 12px));max-width:920px;max-height:none;padding:8px 10px 10px;gap:7px;border-radius:24px;box-shadow:inset 0 2px 0 #fff8bd;overflow:hidden}
+  #finalChoices .excellent-image{width:min(900px,calc((100dvh - 90px) * 1.776),calc(100vw - 40px));max-width:100%;height:auto;max-height:none;object-fit:contain;border-radius:10px}
+  #finalChoices #finishTourButton{min-width:160px;min-height:38px;margin:0 auto;padding:7px 20px;border-width:3px;font-size:18px;box-shadow:0 4px 0 #28601d,0 6px 10px #0003}
+  @media(max-width:650px){
+    #finalChoices .completion-card{width:min(94%,920px);padding:6px 8px 8px;gap:5px;border-radius:18px}
+    #finalChoices .excellent-image{width:min(calc((100dvh - 72px) * 1.776),calc(100vw - 28px))}
+    #finalChoices #finishTourButton{min-width:145px;min-height:34px;padding:5px 16px;font-size:17px}
+  }
+`;
+document.head.appendChild(finalVisualTuningStyle);
 document.getElementById('game').appendChild(finalChoices);
 const gameCanvas = document.getElementById('scene');
 gameCanvas.addEventListener('pointerdown', event => {
